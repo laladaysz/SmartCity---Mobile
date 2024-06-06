@@ -91,7 +91,7 @@ export default function Geo() {
     const fetchSensors = async () => {
         try {
             const token = localStorage.getItem('access_token'); // Pode usar AsyncStorage para armazenar token em produção
-            const response = await axios.get('http://127.0.0.1:8000/api/sensores/', {
+            const response = await axios.get('https://4998-189-57-188-42.ngrok-free.app/api/sensores/', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
