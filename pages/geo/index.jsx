@@ -6,23 +6,23 @@ import axios from 'axios';
 import styles from './styles';
 
 export default function Geo() {
+    
+
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     
     const [la, setLa] = useState(null);
     const [lo, setLo] = useState(null);
-
-    const [distance1, setDistance1] = useState(null); // Distância até o ponto fixo 1
-    const [distance2, setDistance2] = useState(null); // Distância até o ponto fixo 2
-    const [temp, setTemp] = useState(null);
+    const [sensorProx, setSensorProx] = useState(null);
 
     const [modalVisible, setModalVisible] = useState(false);
 
     const [sensor, setSensor] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    // const [error, setError] = useState(null);
 
-    const [sensors, setSensors] = useState([]);
+    const [sensores, setSensores] = useState([]);
+    const [fixedPoints, setFixedPoints] = useState([]);
 
     const initialRegion = {
         latitude: -22.9140639,
@@ -46,6 +46,64 @@ export default function Geo() {
 
         return d;
     };
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response1 = await axios.get('http://127.0.0.1:8000/api/sensores/1');
+                const response2 = await axios.get('http://127.0.0.1:8000/api/sensores/5');
+                setSensores([response1.data, response2.data]);
+                setFixedPoints ([
+                    {
+                        id: response1.data.id,
+                        latitude: response1.data.latitude,
+                        longitude: response1.data.longitude,
+                        tipo: response1.data.tipo,
+                        localizacao: response1.data.localizacao,
+                        responsavel: response1.data.responsavel,
+                        unidade_medida: response1.data.unidade_medida,
+                        status_operacional: response1.data.status_operacional,
+                        observacao: response1.data.observacao
+                    },
+                    {
+                        id: response2.data.id,
+                        latitude: response2.data.latitude,
+                        longitude: response2.data.longitude,
+                        tipo: response2.data.tipo,
+                        localizacao: response2.data.localizacao,
+                        responsavel: response2.data.responsavel,
+                        unidade_medida: response2.data.unidade_medida,
+                        status_operacional: response2.data.status_operacional,
+                        observacao: response2.data.observacao
+                    }
+                ]);
+                setLoading(false);
+            } catch (error) {
+                setErrorMsg(true);
+                setLoading(false);
+                console.error(error);
+            }
+        };
+    fetchData();
+    }, []);
+
+    
+    // useEffect(() => {
+    //     if (sensores.length > 0 && location) {
+    //         const distanceToFixedPoint1 = haversine(location.latitude, location.longitude, fixedPoints[0].latitude, fixedPoints[0].longitude);
+    //         const distanceToFixedPoint2 = haversine(location.latitude, location.longitude, fixedPoints[1].latitude, fixedPoints[1].longitude);
+    //         setDistance1(distanceToFixedPoint1);
+    //         setDistance2(distanceToFixedPoint2);
+    //         if (distanceToFixedPoint1 <= distanceToFixedPoint2) {
+    //             const sensor = fixedPoints[0];
+    //             setSensorProximo(sensor);
+    //         } else {
+    //             const sensor = fixedPoints[1];
+    //             setSensorProximo(sensor);
+    //         }
+    //     }
+    // }, [sensores, location, sensorProximo]);
 
     useEffect(() => {
         (async () => {
@@ -75,36 +133,16 @@ export default function Geo() {
 
                         const closestSensor = sensors.reduce((prev, curr) => prev.distance < curr.distance ? prev : curr);
                         setSensor(closestSensor); // Define o sensor mais próximo
-                        setTemp(closestSensor.temp); // Atualiza a temperatura do sensor mais próximo
+                
                     }
                 }
             );
-
-            fetchSensors(); // Busca sensores do banco de dados
 
             return () => {
                 locationSubscription.remove();
             };
         })();
-    }, [sensors]);
-
-    const fetchSensors = async () => {
-        try {
-            const token = localStorage.getItem('access_token'); // Pode usar AsyncStorage para armazenar token em produção
-            const response = await axios.get('https://4998-189-57-188-42.ngrok-free.app/api/sensores/', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            setSensors(response.data);
-            setLoading(false);
-
-        } catch (err) {
-            setError(err);
-            setLoading(false);
-        }
-    };
+    }, [sensores]);
 
     let text = 'Waiting...';
     if (errorMsg) {
@@ -119,7 +157,7 @@ export default function Geo() {
                 style={styles.map}
                 initialRegion={initialRegion}
             >
-                {sensors.map(sensor => (
+                {sensores.map(sensor => (
                     <Marker
                         key={sensor.id}
                         coordinate={{ latitude: sensor.latitude, longitude: sensor.longitude }}
@@ -138,7 +176,7 @@ export default function Geo() {
                 <View style={styles.cx}><Text style={styles.cxTxt}>Latitude: </Text><Text style={styles.cxTxt}>{la}</Text></View>
                 <View style={styles.cx}><Text style={styles.cxTxt}>Longitude: </Text><Text style={styles.cxTxt}>{lo}</Text></View>
                 <View style={styles.cx}><Text style={styles.cxTxt}>Distância até o sensor mais próximo: </Text>{sensor && <Text style={styles.cxTxt}>{sensor.distance.toFixed(1)} metros</Text>}</View>
-                <View style={styles.cx}><Text style={styles.cxTxt}>Temperatura:</Text><Text style={styles.cxTxt}>{temp}ºC</Text></View>
+                <View style={styles.cx}><Text style={styles.cxTxt}>Temperatura:</Text><Text style={styles.cxTxt}></Text></View>
             </View>
 
             <View style={styles.details}>
@@ -161,12 +199,12 @@ export default function Geo() {
                             ) : (
                                 sensor ? (
                                     <>
-                                        <Text style={styles.modalTitle}>Sensor {sensor.id}</Text>
+                                        <Text style={styles.modalTitle}>Sensor </Text>
                                         <Text style={styles.modalText}>Responsável: {sensor.responsavel}</Text>
                                         <Text style={styles.modalText}>Localidade: {sensor.localizacao}</Text>
                                         <Text style={styles.modalText}>Latitude: {sensor.latitude}</Text>
                                         <Text style={styles.modalText}>Longitude: {sensor.longitude}</Text>
-                                        <Text style={styles.modalText}>Temperatura: {temp}ºC</Text>
+                                        <Text style={styles.modalText}>Temperatura: 25 ºC</Text>
                                     </>
                                 ) : (
                                     <Text style={styles.modalText}>Sensor não encontrado.</Text>
