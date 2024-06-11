@@ -51,8 +51,8 @@ export default function Geo() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response1 = await axios.get('http://127.0.0.1:8000/api/sensores/1');
-                const response2 = await axios.get('http://127.0.0.1:8000/api/sensores/5');
+                const response1 = await axios.get('https://laladaysz.pythonanywhere.com/api/sensores/1');
+                const response2 = await axios.get('https://laladaysz.pythonanywhere.com/api/sensores/5');
                 setSensores([response1.data, response2.data]);
                 setFixedPoints ([
                     {
@@ -125,13 +125,13 @@ export default function Geo() {
                     setLo(newLocation.coords.longitude);
 
                     // Calcular a distância entre a localização atual e os pontos fixos
-                    if (sensors.length > 0) {
-                        sensors.forEach(sensor => {
+                    if (sensores.length > 0) {
+                        sensores.forEach(sensor => {
                             const distance = haversine(newLocation.coords.latitude, newLocation.coords.longitude, sensor.latitude, sensor.longitude);
                             sensor.distance = distance; // Armazena a distância no sensor
                         });
 
-                        const closestSensor = sensors.reduce((prev, curr) => prev.distance < curr.distance ? prev : curr);
+                        const closestSensor = sensores.reduce((prev, curr) => prev.distance < curr.distance ? prev : curr);
                         setSensor(closestSensor); // Define o sensor mais próximo
                 
                     }
@@ -176,7 +176,7 @@ export default function Geo() {
                 <View style={styles.cx}><Text style={styles.cxTxt}>Latitude: </Text><Text style={styles.cxTxt}>{la}</Text></View>
                 <View style={styles.cx}><Text style={styles.cxTxt}>Longitude: </Text><Text style={styles.cxTxt}>{lo}</Text></View>
                 <View style={styles.cx}><Text style={styles.cxTxt}>Distância até o sensor mais próximo: </Text>{sensor && <Text style={styles.cxTxt}>{sensor.distance.toFixed(1)} metros</Text>}</View>
-                <View style={styles.cx}><Text style={styles.cxTxt}>Temperatura:</Text><Text style={styles.cxTxt}></Text></View>
+                <View style={styles.cx}><Text style={styles.cxTxt}>Temperatura:  </Text><Text style={styles.cxTxt}>25 ºC</Text></View>
             </View>
 
             <View style={styles.details}>
@@ -199,12 +199,13 @@ export default function Geo() {
                             ) : (
                                 sensor ? (
                                     <>
-                                        <Text style={styles.modalTitle}>Sensor </Text>
+                                        <Text style={styles.modalTitle}>Sensor mais próximo: {sensor.id}</Text>
                                         <Text style={styles.modalText}>Responsável: {sensor.responsavel}</Text>
+                                        <Text style={styles.modalText}>Tipo: {sensor.tipo}</Text>
                                         <Text style={styles.modalText}>Localidade: {sensor.localizacao}</Text>
                                         <Text style={styles.modalText}>Latitude: {sensor.latitude}</Text>
                                         <Text style={styles.modalText}>Longitude: {sensor.longitude}</Text>
-                                        <Text style={styles.modalText}>Temperatura: 25 ºC</Text>
+                                        <Text style={styles.modalText}>Temperatura atual: 25 ºC</Text>
                                     </>
                                 ) : (
                                     <Text style={styles.modalText}>Sensor não encontrado.</Text>
