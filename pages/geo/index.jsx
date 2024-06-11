@@ -88,22 +88,6 @@ export default function Geo() {
     fetchData();
     }, []);
 
-    
-    // useEffect(() => {
-    //     if (sensores.length > 0 && location) {
-    //         const distanceToFixedPoint1 = haversine(location.latitude, location.longitude, fixedPoints[0].latitude, fixedPoints[0].longitude);
-    //         const distanceToFixedPoint2 = haversine(location.latitude, location.longitude, fixedPoints[1].latitude, fixedPoints[1].longitude);
-    //         setDistance1(distanceToFixedPoint1);
-    //         setDistance2(distanceToFixedPoint2);
-    //         if (distanceToFixedPoint1 <= distanceToFixedPoint2) {
-    //             const sensor = fixedPoints[0];
-    //             setSensorProximo(sensor);
-    //         } else {
-    //             const sensor = fixedPoints[1];
-    //             setSensorProximo(sensor);
-    //         }
-    //     }
-    // }, [sensores, location, sensorProximo]);
 
     useEffect(() => {
         (async () => {
