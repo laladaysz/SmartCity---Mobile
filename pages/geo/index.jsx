@@ -23,6 +23,8 @@ export default function Geo() {
 
     const [sensores, setSensores] = useState([]);
     const [fixedPoints, setFixedPoints] = useState([]);
+    const [temp, setTemp] = useState([]);
+    const [register, setRegister] = useState([]);
 
     const initialRegion = {
         latitude: -22.9140639,
@@ -88,7 +90,6 @@ export default function Geo() {
     fetchData();
     }, []);
 
-
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -135,6 +136,39 @@ export default function Geo() {
         text = `Latitude: ${location.latitude}, Longitude: ${location.longitude}`;
     }
 
+    useEffect(() => {
+        const fetchData = async () => {
+            if (sensor) {
+                try {
+                    const responsetemp = await axios.get(`https://laladaysz.pythonanywhere.com/api/temperatura_filter?sensor_id=${sensor.id}`);
+                    if (responsetemp.data.length > 0) {
+                        const lastRecord = responsetemp.data[responsetemp.data.length - 1];  
+                        console.log(lastRecord)
+                        setTemp(lastRecord.valor);
+                        setRegister([
+                            {
+                                id: lastRecord.data.id,
+                                valor: lastRecord.data.valor,
+                                timestamp: lastRecord.data.timestamp,
+                                sensor_id: lastRecord.data.sensor_id
+                            }
+                        ]);
+                    } else {
+                        setTemp(null);
+                        setRegister([]);
+                    }
+    
+                    setLoading(false);
+                } catch (error) {
+                    setErrorMsg(true);
+                    setLoading(false);
+                    console.error(error);
+                }
+            }
+        };
+        fetchData();
+    }, [sensor]);
+
     return (
         <View style={styles.container}>
             <MapView
@@ -160,7 +194,7 @@ export default function Geo() {
                 <View style={styles.cx}><Text style={styles.cxTxt}>Latitude: </Text><Text style={styles.cxTxt}>{la}</Text></View>
                 <View style={styles.cx}><Text style={styles.cxTxt}>Longitude: </Text><Text style={styles.cxTxt}>{lo}</Text></View>
                 <View style={styles.cx}><Text style={styles.cxTxt}>Distância até o sensor mais próximo: </Text>{sensor && <Text style={styles.cxTxt}>{sensor.distance.toFixed(1)} metros</Text>}</View>
-                <View style={styles.cx}><Text style={styles.cxTxt}>Temperatura:  </Text><Text style={styles.cxTxt}>25 ºC</Text></View>
+                <View style={styles.cx}><Text style={styles.cxTxt}>Temperatura:  </Text><Text style={styles.cxTxt}>{temp} ºC</Text></View>
             </View>
 
             <View style={styles.details}>
@@ -189,7 +223,7 @@ export default function Geo() {
                                         <Text style={styles.modalText}>Localidade: {sensor.localizacao}</Text>
                                         <Text style={styles.modalText}>Latitude: {sensor.latitude}</Text>
                                         <Text style={styles.modalText}>Longitude: {sensor.longitude}</Text>
-                                        <Text style={styles.modalText}>Temperatura atual: 25 ºC</Text>
+                                        <Text style={styles.modalText}>Temperatura atual: {temp} ºC</Text>
                                     </>
                                 ) : (
                                     <Text style={styles.modalText}>Sensor não encontrado.</Text>
