@@ -31,12 +31,8 @@ export default function Login({ navigation }) {
 
   return (
     <View style={styles.container}>
-      
-      <View style={styles.content}>              
-        <Text style={styles.titleTextPrincipal}>Projeto <Text style={{color: '#00f245'}}>SmartCity</Text></Text>
-        <Text style={styles.titleText}>Seja <Text style={{fontWeight: 'bold'}}>bem-vindo(a)</Text></Text>
-        <View style={styles.formContainer}>
-          <View style={styles.formContent}>
+                    
+        <Text style={styles.titleTextPrincipal}>Login</Text>
             <View style={styles.form}>
               <View style={styles.campo}>
                 <Text style={styles.label}>Usuário</Text>
@@ -62,9 +58,8 @@ export default function Login({ navigation }) {
               </TouchableOpacity>
               <Text>{message}</Text>
             </View>
-          </View>
+          
         </View>
-      </View>
-    </View>
+    
   );
 }

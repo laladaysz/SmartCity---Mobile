@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
       color: 'white',
     },
     cxs: {
-      // backgroundColor: '#f00',
+      // backgroundColor: '#52698b',
       width: '80%',
     },
     cx: {
