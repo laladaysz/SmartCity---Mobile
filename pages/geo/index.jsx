@@ -4,6 +4,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import styles from './styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Geo() {
     
@@ -49,6 +50,7 @@ export default function Geo() {
         return d;
     };
 
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -140,7 +142,22 @@ export default function Geo() {
         const fetchData = async () => {
             if (sensor) {
                 try {
-                    const responsetemp = await axios.get(`https://laladaysz.pythonanywhere.com/api/temperatura_filter?sensor_id=${sensor.id}`);
+                    const token = await AsyncStorage.getItem('token'); 
+                
+                    if (!token) {
+                        setErrorMsg('Token not found');
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    const responsetemp = await axios.post(`https://laladaysz.pythonanywhere.com/api/temperatura_filter`, {
+                        sensor_id: sensor.id
+                    }, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
                     if (responsetemp.data.length > 0) {
                         const lastRecord = responsetemp.data[responsetemp.data.length - 1];  
                         console.log(lastRecord)
