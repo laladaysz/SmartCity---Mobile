@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, Pressable, Modal, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import axios from 'axios';
+import axios, { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function Geo() {
+export default function Geo({route}) {
     
+    const {token} = route.params;
 
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
@@ -33,6 +34,7 @@ export default function Geo() {
         latitudeDelta: 0.001,
         longitudeDelta: 0.001,
     };
+    
 
     const haversine = (lat1, lon1, lat2, lon2) => {
         const toRad = (value) => (value * Math.PI) / 180;
@@ -50,7 +52,25 @@ export default function Geo() {
         return d;
     };
 
-    
+    useEffect(() => {
+        const tokenInterceptor = async (config) => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                } else {
+                    throw new axios.Cancel('Token not found');
+                }
+            } catch (error) {
+                throw new axios.Cancel('Failed to retrieve token');
+            }
+            return config;
+        };
+
+        axios.interceptors.request.use(tokenInterceptor, error => Promise.reject(error));
+    }, []);
+
+    console.log (token)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -142,21 +162,12 @@ export default function Geo() {
         const fetchData = async () => {
             if (sensor) {
                 try {
-                    const token = await AsyncStorage.getItem('token'); 
-                
-                    if (!token) {
-                        setErrorMsg('Token not found');
-                        setLoading(false);
-                        return;
-                    }
                     
                     const responsetemp = await axios.post(`https://laladaysz.pythonanywhere.com/api/temperatura_filter`, {
                         sensor_id: sensor.id
-                    }, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
                     });
+
+                    // axios.interceptors.request.use(tokenInterceptor, error => Promise.reject(error));
                     
                     if (responsetemp.data.length > 0) {
                         const lastRecord = responsetemp.data[responsetemp.data.length - 1];  

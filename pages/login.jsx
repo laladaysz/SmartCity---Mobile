@@ -13,7 +13,7 @@ export default function Login({ navigation }) {
   useEffect(() => {
     if (token) {
       AsyncStorage.setItem('token', token);
-      navigation.navigate('home');
+      navigation.navigate('home', token);
     }
   }, [token]);
 
